@@ -274,12 +274,20 @@ class Renderer:
 
         # ── Ghost players (multiplayer) ────────────────────────────────────────
         for g in getattr(world, '_ghost_players', []):
-            if not g.alive:
+            if not g.get('alive', True):
                 continue
-            dist, scx = self._project(player, g.x, g.y)
+            gx = g.get('x', 0)
+            gy = g.get('y', 0)
+            dist, scx = self._project(player, gx, gy)
             if dist is None:
                 continue
-            drawables.append((dist, scx, 'npc_villager', g.color, 'ghost', g))
+            # Color por raza del ghost
+            try:
+                from races import RACE_DEFS
+                race_color = RACE_DEFS.get(g.get('race_id', 'human'), {}).get('color', (100, 200, 255))
+            except Exception:
+                race_color = (100, 200, 255)
+            drawables.append((dist, scx, 'npc_villager', race_color, 'ghost', g))
 
         # static objects (trees + furniture)
         px, py = player.x, player.y
